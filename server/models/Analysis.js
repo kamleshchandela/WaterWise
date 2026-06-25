@@ -17,6 +17,11 @@ const AnalysisSchema = new mongoose.Schema({
   dietaryCategoryUsed: String,
   userState: String,
   userDistrict: String,
+  comments: [{
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    text: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now }
+  }],
   createdAt: { type: Date, default: Date.now }
 });
 

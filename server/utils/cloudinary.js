@@ -11,7 +11,7 @@ cloudinary.config({
 export const uploadToCloudinary = (buffer, folder = "water-footprint") => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder, resource_type: "image" },
+      { folder, resource_type: "auto" },
       (error, result) => {
         if (error) reject(error);
         else resolve(result);
@@ -19,4 +19,15 @@ export const uploadToCloudinary = (buffer, folder = "water-footprint") => {
     );
     stream.end(buffer);
   });
+};
+
+// Delete a resource from Cloudinary by its public_id
+export const deleteFromCloudinary = async (publicId, resourceType = "image") => {
+  try {
+    const result = await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
+    return result;
+  } catch (err) {
+    console.error("Cloudinary delete error:", publicId, err.message);
+    return null;
+  }
 };

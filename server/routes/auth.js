@@ -1,11 +1,14 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import multer from "multer";
 import User from "../models/User.js";
+import { uploadToCloudinary } from "../utils/cloudinary.js";
 
 const router = express.Router();
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
-router.post("/signup", async (req, res) => {
+router.post("/signup", upload.single("profileImage"), async (req, res) => {
   try {
     const { name, email, password, phone, state, district, dietaryCategory } = req.body;
 
@@ -14,9 +17,21 @@ router.post("/signup", async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // Upload profile image if provided
+    let profileImage = "";
+    let profileImagePublicId = "";
+    if (req.file) {
+      const cloudResult = await uploadToCloudinary(req.file.buffer, "profile-images");
+      profileImage = cloudResult.secure_url;
+      profileImagePublicId = cloudResult.public_id;
+    }
+
     const user = await User.create({
       name, email, phone, state, district, dietaryCategory,
       password: hashedPassword,
+      profileImage,
+      profileImagePublicId,
+      bio: "",
       createdAt: new Date(),
       lastLoginAt: new Date(),
       loginHistory: [{ loginTime: new Date(), ipAddress: req.ip }]
@@ -29,7 +44,9 @@ router.post("/signup", async (req, res) => {
       user: {
         id: user._id, name: user.name, email: user.email,
         state: user.state, district: user.district,
-        dietaryCategory: user.dietaryCategory
+        dietaryCategory: user.dietaryCategory,
+        profileImage: user.profileImage,
+        bio: user.bio
       }
     });
   } catch (err) {
@@ -57,7 +74,9 @@ router.post("/login", async (req, res) => {
       user: {
         id: user._id, name: user.name, email: user.email,
         state: user.state, district: user.district,
-        dietaryCategory: user.dietaryCategory
+        dietaryCategory: user.dietaryCategory,
+        profileImage: user.profileImage || "",
+        bio: user.bio || ""
       }
     });
   } catch (err) {

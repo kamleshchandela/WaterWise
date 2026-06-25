@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -15,6 +16,15 @@ export default {
       fontFamily: {
         sans: ['Poppins', 'Inter', 'sans-serif'],
       },
+      keyframes: {
+        storyProgress: {
+          '0%': { width: '0%' },
+          '100%': { width: '100%' },
+        }
+      },
+      animation: {
+        'story-progress': 'storyProgress 5s linear forwards',
+      }
     },
   },
   plugins: [],
